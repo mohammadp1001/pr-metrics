@@ -19,6 +19,10 @@
 // posts a summary comment on the PR. --dry-run skips both the CSV write
 // and the comment. --local writes metrics/issue-metrics.csv inside the
 // repo instead of the central store.
+//
+// If the PR isn't merged yet, prints an interim report (merged: false,
+// mergedAt: null, durationHours measured up to now) and always stops there -
+// no CSV write or PR comment happens pre-merge, regardless of flags.
 
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, existsSync, mkdirSync, appendFileSync } from "node:fs";
@@ -82,15 +86,13 @@ try {
   );
 }
 
-if (!pr.mergedAt) {
-  fail(`PR #${pr.number} (${nameWithOwner}) is not merged yet - nothing to report.`);
-}
 if (!pr.commits || pr.commits.length === 0) {
   fail(`PR #${pr.number} has no commits - cannot determine a start time.`);
 }
 
 const branch = pr.headRefName;
-const mergedAt = new Date(pr.mergedAt);
+const merged = Boolean(pr.mergedAt);
+const mergedAt = merged ? new Date(pr.mergedAt) : null;
 const startedAt = pr.commits
   .map((c) => new Date(c.authoredDate ?? c.committedDate))
   .sort((a, b) => a - b)[0];
@@ -147,7 +149,7 @@ const totalTokens = totals.input + totals.cacheCreate + totals.cacheRead + total
 
 // --- report ---
 
-const durationMs = mergedAt - startedAt;
+const durationMs = (merged ? mergedAt : new Date()) - startedAt;
 const durationHrs = durationMs / 3_600_000;
 
 const summary = {
@@ -156,8 +158,9 @@ const summary = {
   title: pr.title,
   branch,
   issues,
+  merged,
   startedAt: startedAt.toISOString(),
-  mergedAt: mergedAt.toISOString(),
+  mergedAt: merged ? mergedAt.toISOString() : null,
   durationHours: Math.round(durationHrs * 100) / 100,
   tokens: { ...totals, total: totalTokens },
   assistantTurns: matchedLines,
@@ -171,6 +174,13 @@ if (matchedLines === 0) {
       `Token counts are zero - the work may not have used Claude Code, may have run on a different ` +
       `machine, or the branch name at commit time didn't match "${branch}" (e.g. it was renamed).`
   );
+}
+
+if (!merged) {
+  console.log(
+    `(PR #${pr.number} is not merged yet: interim report only, skipping CSV write and PR comment)`
+  );
+  process.exit(0);
 }
 
 if (dryRun) {
