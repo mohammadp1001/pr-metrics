@@ -23,13 +23,13 @@ project.
 ## Usage
 
 ```
-node skills/issue-metrics/issue-metrics.mjs [pr-number] [--dry-run] [--local]
+node skills/pr-metrics/pr-metrics.mjs [pr-number] [--dry-run] [--local]
 ```
 
 - No `pr-number` -> uses the PR associated with the current branch.
 - `--dry-run` -> prints the JSON summary only; skips the CSV write and PR
   comment. Always run this first. No-op on an open PR (see below).
-- `--local` -> writes `<repo>/metrics/issue-metrics.csv` inside the target
+- `--local` -> writes `<repo>/metrics/pr-metrics.csv` inside the target
   repo instead of the default central store at
   `~/.claude/metrics/<owner>-<repo>.csv`.
 
@@ -43,18 +43,18 @@ The JSON output includes a `merged` boolean:
 
 ## Claude Code skill
 
-`skills/issue-metrics/SKILL.md` is a Claude Code skill that tells an agent
+`skills/pr-metrics/SKILL.md` is a Claude Code skill that tells an agent
 how and when to invoke the script safely. To make it discoverable by Claude
 Code, link (don't copy) it into place:
 
 ```powershell
-New-Item -ItemType Junction -Path "$HOME\.claude\skills\issue-metrics" -Target "<path-to-this-repo>\skills\issue-metrics"
+New-Item -ItemType Junction -Path "$HOME\.claude\skills\pr-metrics" -Target "<path-to-this-repo>\skills\pr-metrics"
 ```
 
 A convenience shell alias (PowerShell `$PROFILE`):
 
 ```powershell
-function issue-metrics {
-    node "$HOME\.claude\skills\issue-metrics\issue-metrics.mjs" @args
+function pr-metrics {
+    node "$HOME\.claude\skills\pr-metrics\pr-metrics.mjs" @args
 }
 ```

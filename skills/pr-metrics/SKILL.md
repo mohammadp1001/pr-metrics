@@ -1,11 +1,11 @@
 ---
-name: issue-metrics
-description: Report Claude Code token usage and elapsed time (first commit to PR merge, or first commit to now for a still-open PR) for a GitHub PR/issue. Use when the user wants to log/track/report how many tokens or how long an issue took, right after a PR is merged, mid-review on an open PR, or asks to see past issue metrics.
+name: pr-metrics
+description: Report Claude Code token usage and elapsed time (first commit to PR merge, or first commit to now for a still-open PR) for a GitHub PR/issue. Use when the user wants to log/track/report how many tokens or how long a PR took, right after a PR is merged, mid-review on an open PR, or asks to see past PR metrics.
 ---
 
 Reports token usage and time-to-merge for a PR, tied to the GitHub issue(s)
 it closes, using the script at
-`~/.claude/skills/issue-metrics/issue-metrics.mjs`. This script is
+`~/.claude/skills/pr-metrics/pr-metrics.mjs`. This script is
 project-agnostic - it works from inside any git repo with a GitHub remote,
 no per-repo setup needed.
 
@@ -24,14 +24,14 @@ no per-repo setup needed.
 ## How to run it
 
 ```
-node "$HOME/.claude/skills/issue-metrics/issue-metrics.mjs" [pr-number] [--dry-run] [--local]
+node "$HOME/.claude/skills/pr-metrics/pr-metrics.mjs" [pr-number] [--dry-run] [--local]
 ```
 
-Or, if the user's shell has the `issue-metrics` alias set up (PowerShell
+Or, if the user's shell has the `pr-metrics` alias set up (PowerShell
 profile function), just:
 
 ```
-issue-metrics [pr-number] [--dry-run] [--local]
+pr-metrics [pr-number] [--dry-run] [--local]
 ```
 
 - `pr-number` — optional; defaults to the PR associated with the current
@@ -40,7 +40,7 @@ issue-metrics [pr-number] [--dry-run] [--local]
 - `--dry-run` — prints the JSON summary only; does **not** write the CSV or
   post a PR comment. Always run this first to sanity-check the numbers.
   No-op on an open (unmerged) PR, since those never write/post anyway.
-- `--local` — writes to `<repo>/metrics/issue-metrics.csv` inside the repo
+- `--local` — writes to `<repo>/metrics/pr-metrics.csv` inside the repo
   instead of the default central store at
   `~/.claude/metrics/<owner>-<repo>.csv`.
 

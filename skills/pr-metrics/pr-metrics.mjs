@@ -12,12 +12,12 @@
 // timestamp, via `gh`).
 //
 // Usage:
-//   node issue-metrics.mjs [pr-number] [--dry-run] [--local]
+//   node pr-metrics.mjs [pr-number] [--dry-run] [--local]
 //
 // With no PR number, uses the PR associated with the current branch.
 // By default appends a row to ~/.claude/metrics/<owner>-<repo>.csv and
 // posts a summary comment on the PR. --dry-run skips both the CSV write
-// and the comment. --local writes metrics/issue-metrics.csv inside the
+// and the comment. --local writes metrics/pr-metrics.csv inside the
 // repo instead of the central store.
 //
 // If the PR isn't merged yet, prints an interim report (merged: false,
@@ -82,7 +82,7 @@ try {
     prArg
       ? `Could not find PR #${prArg} in ${nameWithOwner}.\n${e.message}`
       : `No PR found for the current branch in ${nameWithOwner}. ` +
-          `Pass a PR number explicitly: node issue-metrics.mjs <pr-number>\n${e.message}`
+          `Pass a PR number explicitly: node pr-metrics.mjs <pr-number>\n${e.message}`
   );
 }
 
@@ -194,7 +194,7 @@ let csvPath;
 if (useLocalCsv) {
   const metricsDir = path.join(repoRoot, "metrics");
   if (!existsSync(metricsDir)) mkdirSync(metricsDir, { recursive: true });
-  csvPath = path.join(metricsDir, "issue-metrics.csv");
+  csvPath = path.join(metricsDir, "pr-metrics.csv");
 } else {
   const metricsDir = path.join(homedir(), ".claude", "metrics");
   if (!existsSync(metricsDir)) mkdirSync(metricsDir, { recursive: true });
@@ -228,7 +228,7 @@ console.log(`Appended to ${csvPath}`);
 // --- post PR comment ---
 
 const commentBody = [
-  `**Issue metrics** (via \`issue-metrics.mjs\`)`,
+  `**PR metrics** (via \`pr-metrics.mjs\`)`,
   ``,
   `- Issues closed: ${issues.length ? issues.map((n) => `#${n}`).join(", ") : "(none linked)"}`,
   `- Started: ${summary.startedAt}`,
